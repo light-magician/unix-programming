@@ -17,3 +17,7 @@ docker exec -it unix-programming-dev-1 bash
 
 Changes made on local will
 immediately reflect on container.
+
+## book
+
+http://www.apuebook.com/code3e.html

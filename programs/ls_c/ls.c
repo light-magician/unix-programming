@@ -1,10 +1,10 @@
 // This program is a copy of 'ls'
 //
 // compile with:
-// clang -o ls_c ls.c
+// clang -o ls_c.o ls.c
 //
 // run with:
-// ./ls_c
+// ./ls_c.o
 
 #include <dirent.h>
 #include <errno.h>

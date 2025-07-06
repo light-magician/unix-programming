@@ -6,7 +6,8 @@ RUN apt-get update && apt-get install -y \
     gdb \
     lldb \
     vim \
+    procps \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /workspace
-COPY . /workspace
+  WORKDIR /workspace
+  COPY . /workspace

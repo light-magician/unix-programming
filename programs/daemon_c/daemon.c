@@ -78,6 +78,13 @@ int daemonize(void) {
    */
   chdir("/");
   /*
+   * Umask ensures that any files the daemon creates
+   * will have permissions unrestricted by the inherited unmask.
+   * umask(0) clears all restrictions - files get exactly the permissions
+   * you specify when creating them.
+   */
+  umask(0);
+  /*
    * Unneeded file descriptors should be closed so that
    * any descriptors inherited from parent do not remain open.
    */

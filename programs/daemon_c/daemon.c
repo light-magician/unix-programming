@@ -26,7 +26,18 @@
 int daemonize(void) {
   // mem space for process id
   pid_t pid;
-  // fork off parent process
+  /* Call fork and have the parent exit.
+   *
+   * If daemon was started as a shell command,
+   * having the parent terminate makes the
+   * shell think the command is finished.
+   *
+   * Child inherits the process group id of
+   * the parent but gets its own process id,
+   * so it is guaranteed that the daemon is
+   * not a process group leader. This is a
+   * prerequisite for the call to setsid later.
+   */
   pid = fork();
   if (pid < 0) {
     return -1;
@@ -35,7 +46,13 @@ int daemonize(void) {
   if (pid > 0) {
     exit(0);
   }
-  // create new session
+  /*
+   * Call setsid to create a new session.
+   * The process then:
+   * - becomes leader of a new session
+   * - becomes leader of a new process group
+   * - is disassociated from its controlling terminal
+   */
   if (setsid() < 0) {
     return -1;
   }
@@ -49,14 +66,33 @@ int daemonize(void) {
   if (pid > 0) {
     exit(0);
   }
-  // change working dir to root
+  /*
+   * Change current working directory to root directory.
+   * Current working directory inherited from parent could
+   * be on a mounted filesystem. Daemons normally exist until
+   * the system is rebooted, thus if it stays on a mounted
+   * filesystem, the filesystem cannot be unmounted.
+   *
+   * It wouls also make sense to change to a dir in which
+   * the daemon will do all of its work.
+   */
   chdir("/");
-  // close all open file descriptors
+  /*
+   * Unneeded file descriptors should be closed so that
+   * any descriptors inherited from parent do not remain open.
+   */
   int fd;
   for (fd = sysconf(_SC_OPEN_MAX); fd >= 0; fd--) {
     close(fd);
   }
-  // reopen stdin, stdout, stderr to /dev/null
+  /*
+   * Opening file descriptors 0, 1, 2 to /dev/null
+   * ensures that any library routines that try to
+   * read from stdin or write to stdout or stderr
+   * will have no effect. This puts the process
+   * "fully in the background" as there is no way
+   * to receive input or for output to be displayed.
+   */
   open("/dev/null", O_RDWR); // stdin
   dup(0);                    // stdout
   dup(0);                    // stderr
